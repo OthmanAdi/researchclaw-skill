@@ -1,0 +1,30 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash(researchclaw*)",
+        "command": "bash .claude/skills/researchclaw/scripts/post-run-check.sh \"$TOOL_OUTPUT\"",
+        "description": "Auto-check pipeline output after any researchclaw CLI command for errors and warnings"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write(config.yaml)",
+        "command": "bash .claude/skills/researchclaw/scripts/pre-config-write.sh",
+        "description": "Backup existing config.yaml before overwriting"
+      },
+      {
+        "matcher": "Bash(rm *artifacts*)",
+        "command": "bash .claude/skills/researchclaw/scripts/pre-delete-guard.sh",
+        "description": "Prevent accidental deletion of pipeline artifacts"
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "Bash(researchclaw run*)",
+        "command": "bash .claude/skills/researchclaw/scripts/notify-completion.sh",
+        "description": "Notify when a pipeline run completes or fails"
+      }
+    ]
+  }
+}

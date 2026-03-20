@@ -1,0 +1,26 @@
+# Artifacts from pipeline runs
+artifacts/
+
+# Config files with API keys
+config.yaml
+
+# Backup files
+*.backup-*
+
+# Logs
+researchclaw-run.log
+researchclaw-resume.log
+researchclaw-notifications.log
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
