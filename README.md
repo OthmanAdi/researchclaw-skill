@@ -14,6 +14,11 @@
 </p>
 
 <p align="center">
+  <a href="https://getskillcheck.com"><img src="https://raw.githubusercontent.com/olgasafonova/skillcheck-free/main/skill-check/passed.svg" alt="SkillCheck Validated"></a>
+  <a href="#validation"><img src="https://img.shields.io/badge/Security-Audited_v1.0.0-blue" alt="Security Verified"></a>
+</p>
+
+<p align="center">
   <a href="https://code.claude.com/docs/en/skills"><img src="https://img.shields.io/badge/Claude%20Code-Skill-blue" alt="Claude Code Skill"></a>
   <a href="https://docs.cursor.com/context/skills"><img src="https://img.shields.io/badge/Cursor-Skills-purple" alt="Cursor Skills"></a>
   <a href="https://geminicli.com/docs/cli/skills/"><img src="https://img.shields.io/badge/Gemini%20CLI-Skills-4285F4" alt="Gemini CLI"></a>
@@ -223,24 +228,30 @@ Stage 15 can autonomously loop: REFINE goes back to Stage 13, PIVOT goes back to
 ## Project Structure
 
 ```
+skills/                                 # Publishing source (skills.sh + npx skills add)
+├── researchclaw/
+│   ├── SKILL.md                        # Main skill definition (English)
+│   ├── assets/
+│   │   └── config-template.yaml        # Config generation template
+│   ├── references/
+│   │   ├── pipeline-stages.md          # All 23 stages documented
+│   │   ├── config-reference.md         # Every config field explained
+│   │   ├── troubleshooting.md          # 10 error patterns with fixes
+│   │   └── README-CN.md               # Chinese reference
+│   └── scripts/
+│       ├── check-prereqs.sh            # JSON prerequisite report
+│       ├── post-run-check.sh           # PostToolUse error scanner
+│       ├── pre-config-write.sh         # PreToolUse config backup
+│       ├── pre-delete-guard.sh         # PreToolUse artifact guard
+│       └── notify-completion.sh        # Completion notification
+└── researchclaw-cn/
+    ├── SKILL.md                        # Chinese skill definition
+    └── scripts/                        # Shared hook scripts
 .claude/
-├── hooks.json                          # 4 Claude Code hooks
-└── skills/
-    └── researchclaw/
-        ├── SKILL.md                    # Main skill definition
-        ├── assets/
-        │   └── config-template.yaml    # Config generation template
-        ├── references/
-        │   ├── pipeline-stages.md      # All 23 stages documented
-        │   ├── config-reference.md     # Every config field explained
-        │   ├── troubleshooting.md      # 10 error patterns with fixes
-        │   └── README-CN.md           # Chinese reference
-        └── scripts/
-            ├── check-prereqs.sh        # JSON prerequisite report
-            ├── post-run-check.sh       # PostToolUse error scanner
-            ├── pre-config-write.sh     # PreToolUse config backup
-            ├── pre-delete-guard.sh     # PreToolUse artifact guard
-            └── notify-completion.sh    # Completion notification
+├── hooks.json                          # 4 Claude Code hooks (local dev)
+└── skills/                             # Local install mirror
+    ├── researchclaw/
+    └── researchclaw-cn/
 tests/
 └── test-skill.sh                       # 58-test self-validation suite
 docs/
@@ -251,6 +262,39 @@ media/
 ├── logo.png                            # Logo (researcher lobster)
 └── logo_wizard.png                     # Logo variant (wizard lobster)
 ```
+
+## Validation
+
+Evaluated using [SkillCheck](https://getskillcheck.com) and a manual security audit following the same methodology used for [planning-with-files](https://github.com/OthmanAdi/planning-with-files/blob/main/docs/evals.md).
+
+### SkillCheck (Free Tier)
+
+| Check | Result |
+|-------|--------|
+| Frontmatter structure (name, description, allowed-tools) | Pass |
+| Name format (`^[a-z][a-z0-9-]*[a-z0-9]$`) | Pass |
+| Description WHAT (action verb) + WHEN (trigger phrase) | Pass |
+| Directory structure matches name field | Pass |
+| Subdirectories follow spec (references/, scripts/, assets/) | Pass |
+| Naming quality (descriptive compound, not generic) | Pass |
+| No contradictions in instructions | Pass |
+| No ambiguous terms | Pass |
+| Output format specified | Pass |
+
+**Strengths detected (6/6):** Example section, error handling, trigger phrases, output format, structured instructions, prerequisites documented.
+
+### Security Audit
+
+| Check | Result | Detail |
+|-------|--------|--------|
+| WebFetch/WebSearch in allowed-tools | Pass | Not present (the vector fixed in planning-with-files v2.21.0) |
+| Unrestricted Bash | Pass | All Bash patterns scoped (e.g. `Bash(python*)`, no wildcard `Bash(*)`) |
+| Hardcoded credentials | Pass | API keys referenced only via env vars |
+| Script injection (eval/exec) | Pass | Zero dynamic execution in all 5 scripts |
+| Strict mode | Pass | All scripts use `set -euo pipefail` |
+| PII in examples | Pass | None found |
+| Artifact deletion guard | Pass (strength) | `pre-delete-guard.sh` blocks `rm *artifacts*` |
+| Config backup on overwrite | Pass (strength) | `pre-config-write.sh` creates timestamped backups |
 
 ## Testing
 
